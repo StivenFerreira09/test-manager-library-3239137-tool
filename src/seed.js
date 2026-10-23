@@ -79,7 +79,8 @@ const BOOK_TITLES = [
 ]
 
 function isbn13(n) {
-  const base = String(9780000000000 + n).slice(0, 12)
+  // 12 dígitos base (978 + 9 dígitos con n) + 1 dígito de control = 13, único por n
+  const base = String(978000000000 + n)
   let sum = 0
   for (let i = 0; i < 12; i++) {
     sum += parseInt(base[i], 10) * (i % 2 === 0 ? 1 : 3)
@@ -125,22 +126,21 @@ async function main() {
 
   console.log('Creando préstamos...')
   let loanCount = 0
+  // 15 préstamos de 1 libro cada uno: con 10 socios nadie pasa de 2 libros
+  // sin devolver (límite de 3, CA-06.4) y no se repite libro.
   for (let i = 0; i < 15; i++) {
     const memberId = memberIds[i % memberIds.length]
-    const b1 = bookIds[i % bookIds.length]
-    const b2 = bookIds[(i + 7) % bookIds.length]
-    const items = b1 === b2 ? [{ book_id: b1 }] : [{ book_id: b1 }, { book_id: b2 }]
     try {
       await request('POST', '/loans', {
         member_id: memberId,
-        items
+        items: [{ book_id: bookIds[i] }]
       }, token)
       loanCount++
-    } catch {
-      // puede fallar por límite de 3 o vencidos; se ignora en demo
+    } catch (err) {
+      console.error(`Préstamo ${i + 1} falló:`, err.message)
     }
   }
-  console.log(`Préstamos creados: ${loanCount}`)
+  console.log(`Préstamos creados: ${loanCount} (esperado: 15)`)
 
   console.log('Listo. Verifica:')
   console.log('- GET /loans/overdue')
