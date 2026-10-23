@@ -1,0 +1,12 @@
+{
+  "name": "manager-library-tool",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "seed": "node src/seed.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5"
+  }
+}
